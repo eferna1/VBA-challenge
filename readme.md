@@ -1,2 +1,138 @@
-# hello
-Test read me file
+Sub StockVolume():
+   For Each ws In Worksheets
+
+     'Set Variable for ticker
+      Dim ticker As String
+      
+      'Set variables for open & close price
+      Dim Open_Price As Double
+      Dim Close_Price As Double
+      
+      'Set variables for yearly change and percent change
+      Dim Yearly_Change As Double
+      Dim Percent_Change As Double
+      
+      'Set variables to identify open price for each ticker
+      Dim Price_Row As Long
+      Price_Row = 2
+      
+      'Total Stock Volume as 0
+      Total = 0
+      
+      'Set variables for highest & lowest percent change
+      Dim Greatest_Increase As Double
+      Dim Greatest_Decrease As Double
+      Dim Greatest_Total As Double
+      Dim Greatest_Increase_Ticker As String
+      Dim Greatest_Decrease_Ticker As String
+      Dim Greatest_Total_Ticker As String
+      
+      'Keep track of each ticker in summary table
+      Dim Summary_Table_Row As Integer
+      Summary_Table_Row = 2
+      
+      'set header name to display data
+      ws.Range("I1").Value = "Ticker"
+      ws.Range("J1").Value = "Yearly Change"
+      ws.Range("K1").Value = "Percent Change"
+      ws.Range("L1").Value = "Total Stock Volume"
+      ws.Range("P1").Value = "Ticker"
+      ws.Range("Q1").Value = "Value"
+      ws.Range("O2").Value = "Greatest % Increase"
+      ws.Range("O3").Value = "Greatest % Decrease"
+      ws.Range("O4").Value = "Greatest Total Volume"
+      
+      'Identify Lastrow
+      LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+      
+      'Loop through ticker colum to find unique ticker and stock volume together
+      For i = 2 To LastRow
+            
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+            
+               'set ticker name
+               ticker = ws.Cells(i, 1).Value
+               
+               'Totatl Stock Volume
+               Total = Total + ws.Range("G" & i).Value
+               
+               'print ticker name
+               ws.Range("I" & Summary_Table_Row).Value = ticker
+               
+               'Print total stock volume
+               ws.Range("L" & Summary_Table_Row).Value = Total
+               
+               'Find open and close price for the year and cal yearly change and % change
+               Open_Price = ws.Range("C" & Price_Row).Value
+               Close_Price = ws.Range("F" & i).Value
+               Yearly_Change = Close_Price - Open_Price
+               
+                  If Open_Price = 0 Then
+                      Percent_Change = 0
+                     Else
+                         Percent_Change = Yearly_Change / Open_Price
+                  End If
+                 
+                 'Print values of yearly change and percent changeto Summary Table
+                  ws.Range("J" & Summary_Table_Row).Value = Yearly_Change
+                  ws.Range("K" & Summary_Table_Row).Value = Percent_Change
+                  ws.Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+                  
+                        'Conditional formatting to highlight positive in green and negative in red
+                        If ws.Range("J" & Summary_Table_Row).Value > 0 Then
+                            ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+                        Else
+                            ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+                        End If
+                  
+                  'add next one to the Summary Table
+                  Summary_Table_Row = Summary_Table_Row + 1
+                  Price_Row = i + 1
+               
+                  'reset the Total stock volume
+                  Total = 0
+            Else
+              Total = Total + ws.Range("G" & i).Value
+                 
+            End If
+                      
+       Next i
+       
+        'Define the range for greatest increase, greatest decrease, & greatest stock volume
+        Greatest_Increase = ws.Range("K2").Value
+        Greatest_Decrease = ws.Range("K2").Value
+        Greatest_Total = ws.Range("L2").Value
+        
+        'Identify the last row of the Summary Table within the Ticker column
+        Lastrow_Ticker = ws.Cells(Rows.Count, 9).End(xlUp).Row
+        
+        'Create Loop to locate the ticker
+         For j = 2 To Lastrow_Ticker:
+               If ws.Range("K" & j + 1).Value > Greatest_Increase Then
+                    Greatest_Increase = ws.Range("K" & j + 1).Value
+                    Greatest_Increase_Ticker = ws.Range("I" & j + 1).Value
+               ElseIf ws.Range("K" & j + 1).Value < Greatest_Decrease Then
+                    Greatest_Decrease = ws.Range("K" & j + 1).Value
+                    Greatest_Decrease_Ticker = ws.Range("I" & j + 1).Value
+                End If
+            
+                If ws.Range("L" & j + 1).Value > Greatest_Total Then
+                    Greatest_Total = ws.Range("L" & j + 1).Value
+                    Greatest_Total_Ticker = ws.Range("I" & j + 1).Value
+                End If
+            
+            Next j
+            
+                'Print ticker and value of greatest % increase, decrease, & total volume
+                ws.Range("P2").Value = Greatest_Increase_Ticker
+                ws.Range("P3").Value = Greatest_Decrease_Ticker
+                ws.Range("P4").Value = Greatest_Total_Ticker
+                ws.Range("Q2").Value = Greatest_Increase
+                ws.Range("Q3").Value = Greatest_Decrease
+                ws.Range("Q4").Value = Greatest_Total
+                ws.Range("Q2:Q3").NumberFormat = "0.00%"
+       
+    Next ws
+   
+End Sub
+
